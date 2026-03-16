@@ -5,7 +5,7 @@ pub struct Span {
 }
 
 impl Span {
-    pub(crate) fn new(start: usize, end: usize) -> Self {
+    pub fn new(start: usize, end: usize) -> Self {
         Self { start, end }
     }
 
