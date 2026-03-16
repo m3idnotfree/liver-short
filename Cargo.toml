@@ -1,6 +1,12 @@
 [package]
 name = "liver-shot"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.81"
+description = "Lightweight no_std JSON value position extractor"
+documentation = "https://docs.rs/liver-shot"
+readme = "README.md"
+repository = "https://github.com/m3idnotfree/liver-short"
+license = "MIT OR Apache-2.0"
+keywords = ["extractor", "json", "no-std", "path", "position"]
+categories = ["no-std", "parser-implementations"]
