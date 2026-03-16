@@ -66,14 +66,13 @@ pub use span::Span;
 
 pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
     let bytes = data.as_bytes();
+    let start = crate::scanner::skip_whitespace(bytes)?;
+    let bytes = &bytes[start..];
 
-    if bytes.is_empty() {
-        return Err(Error::invalid_json());
-    }
-
-    match bytes[0] {
-        b'{' => crate::parser::find_path(bytes, pattern),
-        b'[' => Err(Error::unsupported_array()),
+    match bytes.first() {
+        Some(b'{') => crate::parser::find_path(bytes, pattern)
+            .map(|s| Span::new(start + s.start, start + s.end)),
+        Some(b'[') => Err(Error::unsupported_array()),
         _ => Err(Error::invalid_json()),
     }
 }
