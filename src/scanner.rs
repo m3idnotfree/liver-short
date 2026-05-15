@@ -73,7 +73,28 @@ pub fn scan_string(bytes: &[u8]) -> Result<usize, Error> {
     while pos < bytes.len() {
         match bytes[pos] {
             b'"' => return Ok(pos + 1),
-            b'\\' => pos += 2, // skip escaped character
+            b'\\' => {
+                pos += 1; // skip the backslash
+                if pos < bytes.len() {
+                    match bytes[pos] {
+                        b'u' => {
+                            // Handle \uXXXX or \u{XXXX...}
+                            pos += 1;
+                            if pos < bytes.len() && bytes[pos] == b'{' {
+                                // \u{...} form - skip until closing brace
+                                while pos < bytes.len() && bytes[pos] != b'}' {
+                                    pos += 1;
+                                }
+                                pos += 1; // skip the closing }
+                            } else {
+                                // \uXXXX form - skip 4 hex digits
+                                pos += 4;
+                            }
+                        }
+                        _ => pos += 1, // standard escape: \", \\, \/, \b, \f, \n, \r, \t
+                    }
+                }
+            }
             _ => pos += 1,
         }
     }

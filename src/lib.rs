@@ -76,3 +76,32 @@ pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
         _ => Err(Error::invalid_json()),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_with_unicode_escape() {
+        // Test \u{1F600} (emoji) inside a JSON string
+        let json = r#"{"message": "Hello \u{1F600} World"}"#;
+        let span = find("message", json).unwrap();
+        assert_eq!(r#""Hello \u{1F600} World""#, span.get(json));
+    }
+
+    #[test]
+    fn find_with_unicode_escape_4digit() {
+        // Test A (letter A) inside a JSON string
+        let json = r#"{"message": "Hello A World"}"#;
+        let span = find("message", json).unwrap();
+        assert_eq!(r#""Hello A World""#, span.get(json));
+    }
+
+    #[test]
+    fn find_with_brace_in_string() {
+        // Test literal braces inside a JSON string (should not affect depth)
+        let json = r#"{"template": "Hello {name}!"}"#;
+        let span = find("template", json).unwrap();
+        assert_eq!(r#""Hello {name}!""#, span.get(json));
+    }
+}
