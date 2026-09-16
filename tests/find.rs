@@ -116,3 +116,38 @@ fn invalid_primitive() {
     let err = liver_shot::find("a", json).unwrap_err();
     assert!(err.is_invalid_json());
 }
+
+// PR #1 (https://github.com/m3idnotfree/liver-short/pull/1)
+// Claimed `\u{` was counted as an opening brace in `scan_string`.
+// It is not: `scan_string` branches only on `"` and `\`, so a `{` inside a
+// string never reaches the `depth` counter in `scan_object`.
+// They pass without the patch.
+#[test]
+fn pr_1_hex_unicode() {
+    let json = r#"{"message": "Hello \u{1F600} World"}"#;
+    let span = liver_shot::find("message", json).unwrap();
+    assert_eq!(r#""Hello \u{1F600} World""#, span.get(json));
+
+    let json = r#"{"message": "Hello A World"}"#;
+    let span = liver_shot::find("message", json).unwrap();
+    assert_eq!(r#""Hello A World""#, span.get(json));
+
+    let json = r#"{"template": "Hello {name}!"}"#;
+    let span = liver_shot::find("template", json).unwrap();
+    assert_eq!(r#""Hello {name}!""#, span.get(json));
+}
+
+// PR #1 (https://github.com/m3idnotfree/liver-short/pull/1)
+// Escape handling is deliberately loose: `scan_string` skips exactly one
+// byte after a backslash, then reads on until an unescaped `"`.
+// So the digit count after `\u` never matters and the escape is not validated.
+#[test]
+fn flexible_escape() {
+    let json = r#"{"message": "Hello \u1F600 World"}"#;
+    let span = liver_shot::find("message", json).unwrap();
+    assert_eq!(r#""Hello \u1F600 World""#, span.get(json));
+
+    let json = r#"{"message": "\u00"}"#;
+    let span = liver_shot::find("message", json).unwrap();
+    assert_eq!(r#""\u00""#, span.get(json));
+}
