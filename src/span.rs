@@ -1,4 +1,6 @@
-#[derive(Debug, Default, Clone, Copy)]
+use core::fmt::{Debug, Formatter, Result as FmtResult};
+
+#[derive(Default, Clone, Copy)]
 pub struct Span {
     pub start: usize,
     pub end: usize,
@@ -20,5 +22,13 @@ impl Span {
             self.start + result.start,
             self.start + result.end,
         ))
+    }
+}
+
+impl Debug for Span {
+    fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult {
+        f.debug_tuple("Span")
+            .field(&(self.start..self.end))
+            .finish()
     }
 }
