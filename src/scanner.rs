@@ -103,20 +103,19 @@ pub fn scan_primitive(bytes: &[u8]) -> Result<usize, Error> {
     }
 }
 
-#[inline]
 pub fn skip_whitespace(bytes: &[u8]) -> Result<usize, Error> {
-    let mut pos = 0;
-    while pos < bytes.len() {
-        if bytes[pos].is_ascii_whitespace() {
-            pos += 1;
-        } else {
-            return Ok(pos);
-        }
+    let pos = skip_whitespace_count(bytes);
+    if pos < bytes.len() {
+        Ok(pos)
+    } else {
+        Err(Error::invalid_json())
     }
-
-    Err(Error::invalid_json())
 }
 
 fn skip_whitespace_count(bytes: &[u8]) -> usize {
-    bytes.iter().take_while(|b| b.is_ascii_whitespace()).count()
+    bytes.iter().take_while(|&&b| is_whitespace(b)).count()
+}
+
+fn is_whitespace(b: u8) -> bool {
+    matches!(b, b' ' | b'\n' | b'\r' | b'\t')
 }
