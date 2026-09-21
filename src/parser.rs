@@ -54,13 +54,14 @@ fn find_value(bytes: &[u8]) -> Result<(usize, usize), Error> {
         match bytes[pos] {
             b':' => {
                 pos += 1;
-                pos += skip_whitespace(&bytes[pos..])?;
+                pos = skip_whitespace(bytes, pos);
                 let start = pos;
-                let len = match bytes[pos] {
-                    b'[' => scan_array(&bytes[pos..])?,
-                    b'{' => scan_object(&bytes[pos..])?,
-                    b'"' => scan_string(&bytes[pos..])?,
-                    _ => scan_primitive(&bytes[pos..])?,
+                let len = match bytes.get(pos) {
+                    Some(b'[') => scan_array(&bytes[pos..])?,
+                    Some(b'{') => scan_object(&bytes[pos..])?,
+                    Some(b'"') => scan_string(&bytes[pos..])?,
+                    Some(_) => scan_primitive(&bytes[pos..])?,
+                    None => return Err(Error::invalid_json()),
                 };
                 return Ok((start, len));
             }

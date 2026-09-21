@@ -66,7 +66,7 @@ pub use span::{Span, Value};
 
 pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
     let bytes = data.as_bytes();
-    let start = crate::scanner::skip_whitespace(bytes)?;
+    let start = crate::scanner::skip_whitespace(bytes, 0);
     let bytes = &bytes[start..];
 
     match bytes.first() {

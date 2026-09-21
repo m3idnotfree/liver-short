@@ -87,7 +87,7 @@ pub fn scan_primitive(bytes: &[u8]) -> Result<usize, Error> {
         match bytes[pos] {
             b',' | b']' | b'}' => break,
             b' ' | b'\n' | b'\r' | b'\t' => {
-                let after = pos + skip_whitespace_count(&bytes[pos..]);
+                let after = skip_whitespace(bytes, pos);
                 if after < bytes.len() && !matches!(bytes[after], b',' | b']' | b'}') {
                     return Err(Error::invalid_json());
                 }
@@ -103,17 +103,11 @@ pub fn scan_primitive(bytes: &[u8]) -> Result<usize, Error> {
     }
 }
 
-pub fn skip_whitespace(bytes: &[u8]) -> Result<usize, Error> {
-    let pos = skip_whitespace_count(bytes);
-    if pos < bytes.len() {
-        Ok(pos)
-    } else {
-        Err(Error::invalid_json())
+pub fn skip_whitespace(bytes: &[u8], mut pos: usize) -> usize {
+    while bytes.get(pos).is_some_and(|&b| is_whitespace(b)) {
+        pos += 1
     }
-}
-
-fn skip_whitespace_count(bytes: &[u8]) -> usize {
-    bytes.iter().take_while(|&&b| is_whitespace(b)).count()
+    pos
 }
 
 fn is_whitespace(b: u8) -> bool {
