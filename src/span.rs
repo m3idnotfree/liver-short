@@ -24,8 +24,8 @@ impl Span {
     }
 
     pub fn find(&self, pattern: &str, data: &str) -> Result<Span, crate::Error> {
-        let slice = &data.as_bytes()[self.start..self.end];
-        let result = crate::parser::find_path(slice, pattern)?;
+        let bytes = self.get(data).as_bytes();
+        let result = crate::parser::find_path(bytes, pattern)?;
         Ok(Span::new(
             self.start + result.start,
             self.start + result.end,
