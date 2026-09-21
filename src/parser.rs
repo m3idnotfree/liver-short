@@ -10,8 +10,8 @@ pub fn find_path(bytes: &[u8], pattern: &str) -> Result<Span, Error> {
     for segment in pattern.split('.') {
         let slice = &bytes[abs_start..abs_end];
         let section = find_segment(slice, segment)?;
-        abs_start += section.start;
-        abs_end = abs_start + section.end - section.start;
+        abs_start += section.start();
+        abs_end = abs_start + section.end() - section.start();
     }
 
     Ok(Span::new(abs_start, abs_end))

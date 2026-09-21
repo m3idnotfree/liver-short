@@ -71,7 +71,7 @@ pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
 
     match bytes.first() {
         Some(b'{') => crate::parser::find_path(bytes, pattern)
-            .map(|s| Span::new(start + s.start, start + s.end)),
+            .map(|s| Span::new(start + s.start(), start + s.end())),
         Some(b'[') => Err(Error::unsupported_array()),
         _ => Err(Error::invalid_json()),
     }

@@ -1,14 +1,22 @@
 use core::fmt::{Debug, Formatter, Result as FmtResult};
 
-#[derive(Default, Clone, Copy)]
+#[derive(Clone, Copy)]
 pub struct Span {
-    pub start: usize,
-    pub end: usize,
+    start: usize,
+    end: usize,
 }
 
 impl Span {
-    pub fn new(start: usize, end: usize) -> Self {
+    pub(crate) fn new(start: usize, end: usize) -> Self {
         Self { start, end }
+    }
+
+    pub fn start(&self) -> usize {
+        self.start
+    }
+
+    pub fn end(&self) -> usize {
+        self.end
     }
 
     pub fn get<'a>(&self, data: &'a str) -> &'a str {
