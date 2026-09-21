@@ -167,3 +167,16 @@ fn flexible_escape() {
     let span = liver_shot::find("message", json).unwrap();
     assert_eq!(r#""\u00""#, span.get(json));
 }
+
+#[test]
+fn not_found() {
+    for (json, path) in [
+        ("1", "a"),
+        (r#""a""#, "a"),
+        (r#"{"a": 1}"#, "a.b"),
+        (r#"{"a": { "b": true}}"#, "a.b.c"),
+    ] {
+        let err = liver_shot::find(path, json).unwrap_err();
+        assert!(err.is_not_found(), "{json} {path}");
+    }
+}

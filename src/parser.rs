@@ -18,13 +18,10 @@ pub fn find_path(bytes: &[u8], pattern: &str) -> Result<Span, Error> {
 }
 
 fn find_segment(bytes: &[u8], segment: &str) -> Result<Span, Error> {
-    if bytes.is_empty() {
-        return Err(Error::invalid_json());
-    }
-
-    match bytes[0] {
-        b'{' => search_object(bytes, segment),
-        b'[' => Err(Error::unsupported_array()),
+    match bytes.first() {
+        Some(b'{') => search_object(bytes, segment),
+        Some(b'[') => Err(Error::unsupported_array()),
+        Some(_) => Err(Error::not_found()),
         _ => Err(Error::invalid_json()),
     }
 }
