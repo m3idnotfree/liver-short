@@ -62,7 +62,7 @@ mod scanner;
 mod span;
 
 pub use error::Error;
-pub use span::Span;
+pub use span::{Span, Value};
 
 pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
     let bytes = data.as_bytes();

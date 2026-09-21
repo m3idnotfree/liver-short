@@ -1,44 +1,60 @@
+use liver_shot::Value;
+
 #[test]
 fn string_value() {
     let json = r#"{"a": "1", "b": "2"}"#;
-    assert_eq!("\"1\"", liver_shot::find("a", json).unwrap().get(json));
+    let span = liver_shot::find("a", json).unwrap();
+
+    assert_eq!("\"1\"", span.get(json));
+    assert_eq!(Value::String("1"), span.value(json));
 }
 
 #[test]
 fn number_value() {
     let json = r#"{"a": 1, "b": "2"}"#;
-    assert_eq!("1", liver_shot::find("a", json).unwrap().get(json));
+    let span = liver_shot::find("a", json).unwrap();
+
+    assert_eq!("1", span.get(json));
+    assert_eq!(Value::Number("1"), span.value(json));
 }
 
 #[test]
 fn boolean_value() {
     let json = r#"{"a": true, "b": false}"#;
-    assert_eq!("true", liver_shot::find("a", json).unwrap().get(json));
-    assert_eq!("false", liver_shot::find("b", json).unwrap().get(json));
+    let a = liver_shot::find("a", json).unwrap();
+    let b = liver_shot::find("b", json).unwrap();
+
+    assert_eq!("true", a.get(json));
+    assert_eq!("false", b.get(json));
+    assert_eq!(Value::Bool(true), a.value(json));
+    assert_eq!(Value::Bool(false), b.value(json));
 }
 
 #[test]
 fn null_value() {
     let json = r#"{"a": null}"#;
-    assert_eq!("null", liver_shot::find("a", json).unwrap().get(json));
+    let span = liver_shot::find("a", json).unwrap();
+
+    assert_eq!("null", span.get(json));
+    assert_eq!(Value::Null, span.value(json));
 }
 
 #[test]
 fn object_value() {
     let json = r#"{"a": {"b": "2", "c": "3"}, "d": "4"}"#;
-    assert_eq!(
-        r#"{"b": "2", "c": "3"}"#,
-        liver_shot::find("a", json).unwrap().get(json)
-    );
+    let span = liver_shot::find("a", json).unwrap();
+
+    assert_eq!(r#"{"b": "2", "c": "3"}"#, span.get(json));
+    assert_eq!(Value::Object(r#"{"b": "2", "c": "3"}"#), span.value(json));
 }
 
 #[test]
 fn array_value() {
     let json = r#"{"a": ["1", "2"], "b": "3"}"#;
-    assert_eq!(
-        r#"["1", "2"]"#,
-        liver_shot::find("a", json).unwrap().get(json)
-    );
+    let span = liver_shot::find("a", json).unwrap();
+
+    assert_eq!(r#"["1", "2"]"#, span.get(json));
+    assert_eq!(Value::Array(r#"["1", "2"]"#), span.value(json));
 }
 
 #[test]
