@@ -49,7 +49,7 @@ impl Cursor<'_> {
             Some(b't') => self.skip_literal(b"true"),
             Some(b'f') => self.skip_literal(b"false"),
             Some(b'n') => self.skip_literal(b"null"),
-            Some(_) => self.skip_primitive(),
+            Some(_) => self.skip_number(),
             None => Err(Error::invalid_json()),
         }
     }
@@ -125,19 +125,70 @@ impl Cursor<'_> {
         }
     }
 
-    fn skip_primitive(&mut self) -> Result<(), Error> {
-        let start = self.pos;
-        while let Some(b) = self.peek() {
-            if matches!(b, b',' | b']' | b'}') || is_whitespace(b) {
-                break;
+    /// Skips a number: `[ minus ] int [ frac ] [ exp ]` (RFC 8259).
+    fn skip_number(&mut self) -> Result<(), Error> {
+        self.eat(b'-');
+        self.int()?;
+        self.frac()?;
+        self.exp()
+    }
+
+    /// int = zero / ( digit1-9 *DIGIT )
+    /// zero = %x30                ; 0
+    fn int(&mut self) -> Result<(), Error> {
+        match self.peek() {
+            Some(b'0') => {
+                self.advance();
+                Ok(())
             }
-            self.advance();
+            Some(b'1'..=b'9') => {
+                self.digits();
+                Ok(())
+            }
+            _ => Err(Error::invalid_json()),
         }
+    }
+
+    /// frac = decimal-point 1*DIGIT
+    /// decimal-point = %x2E       ; .
+    fn frac(&mut self) -> Result<(), Error> {
+        if self.eat(b'.') {
+            self.one_or_more_digits()
+        } else {
+            Ok(())
+        }
+    }
+
+    /// exp = e [ minus / plus ] 1*DIGIT
+    /// e = %x65 / %x45            ; e E
+    /// minus = %x2D               ; -
+    /// plus = %x2B                ; +
+    fn exp(&mut self) -> Result<(), Error> {
+        if !(self.eat(b'e') || self.eat(b'E')) {
+            return Ok(());
+        }
+
+        if !self.eat(b'+') {
+            self.eat(b'-');
+        }
+
+        self.one_or_more_digits()
+    }
+
+    fn one_or_more_digits(&mut self) -> Result<(), Error> {
+        let start = self.pos;
+        self.digits();
 
         if self.pos == start {
             Err(Error::invalid_json())
         } else {
             Ok(())
+        }
+    }
+
+    fn digits(&mut self) {
+        while self.peek().is_some_and(|b| b.is_ascii_digit()) {
+            self.advance();
         }
     }
 

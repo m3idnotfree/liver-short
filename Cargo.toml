@@ -10,3 +10,6 @@ repository = "https://github.com/m3idnotfree/liver-short"
 license = "MIT OR Apache-2.0"
 keywords = ["extractor", "json", "no-std", "path", "position"]
 categories = ["no-std", "parser-implementations"]
+
+[dev-dependencies]
+rand = "0.9.5"

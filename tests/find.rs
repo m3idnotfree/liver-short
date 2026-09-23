@@ -126,6 +126,8 @@ fn invalid_json() {
         (r#"{"a" "1", "b": "2"}"#, "b"),
         (r#"{"a": tru}"#, "a"),
         (r#"{"a": fals}"#, "a"),
+        (r#"{"a": TRUE}"#, "a"),
+        (r#"{"a": FALSE}"#, "a"),
     ] {
         let err = liver_shot::find(path, json).unwrap_err();
         assert!(err.is_invalid_json(), "{json} {path}");
