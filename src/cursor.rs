@@ -46,6 +46,9 @@ impl Cursor<'_> {
             Some(b'"') => self.skip_string(),
             Some(b'{') => self.skip_object(),
             Some(b'[') => self.skip_array(),
+            Some(b't') => self.skip_literal(b"true"),
+            Some(b'f') => self.skip_literal(b"false"),
+            Some(b'n') => self.skip_literal(b"null"),
             Some(_) => self.skip_primitive(),
             None => Err(Error::invalid_json()),
         }
@@ -110,6 +113,16 @@ impl Cursor<'_> {
             }
         }
         Err(Error::unterminated_string())
+    }
+
+    fn skip_literal(&mut self, word: &[u8]) -> Result<(), Error> {
+        let end = self.pos + word.len();
+        if self.bytes.get(self.pos..end) == Some(word) {
+            self.pos = end;
+            Ok(())
+        } else {
+            Err(Error::invalid_json())
+        }
     }
 
     fn skip_primitive(&mut self) -> Result<(), Error> {
