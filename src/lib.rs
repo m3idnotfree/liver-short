@@ -56,15 +56,15 @@
 
 #![no_std]
 
+mod cursor;
 mod error;
-mod parser;
-mod scanner;
 mod span;
 
 pub use error::Error;
 pub use span::{Span, Value};
 
 pub fn find(pattern: &str, data: &str) -> Result<Span, Error> {
-    let start = crate::scanner::skip_whitespace(data.as_bytes(), 0);
-    Span::new(start, data.len()).find(pattern, data)
+    let mut cursor = cursor::Cursor::new(data.as_bytes(), 0);
+    cursor.skip_whitespace();
+    cursor.find(pattern)
 }

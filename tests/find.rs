@@ -121,9 +121,10 @@ fn missing_inner() {
 
 #[test]
 fn invalid_json() {
-    let json = r#"{"a": "1}"#;
-    let err = liver_shot::find("a", json).unwrap_err();
-    assert!(err.is_invalid_json());
+    for (json, path) in [(r#"{"a": "1}"#, "a"), (r#"{"a" "1", "b": "2"}"#, "b")] {
+        let err = liver_shot::find(path, json).unwrap_err();
+        assert!(err.is_invalid_json(), "{json} {path}");
+    }
 }
 
 #[test]

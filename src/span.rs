@@ -27,12 +27,7 @@ impl Span {
     }
 
     pub fn find(&self, pattern: &str, data: &str) -> Result<Span, crate::Error> {
-        let bytes = self.get(data).as_bytes();
-        let result = crate::parser::find_path(bytes, pattern)?;
-        Ok(Span::new(
-            self.start + result.start,
-            self.start + result.end,
-        ))
+        crate::cursor::Cursor::new(data.as_bytes(), self.start).find(pattern)
     }
 
     /// Converts the text [`Self::get`] returns into a Rust type.
