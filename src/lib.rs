@@ -1,11 +1,14 @@
-//! A lightweight, `no_std` JSON value position extractor.
+//! A lightweight, `no_std` JSON value position extractor with no allocation,
+//! no `unsafe`, and no dependencies.
 //!
 //! Returns a [`Span`] (start/end byte offsets) rather than a parsed value.
 //!
 //! ## Limitations
 //!
-//! - Object navigation only - arrays at the top level or as a path step return [`Error::is_unsupported_array`].
-//! - Values are not validated — only their position is extracted.
+//! - Object navigation only - arrays at the top level or as a path step
+//!   return [`Error::is_unsupported_array`].
+//! - Values are not parsed - [`Span::get`] returns the JSON text as written.
+//!   Use [`Span::value`] to read it as a Rust type.
 //!
 //! ## Examples
 //!
@@ -52,6 +55,22 @@
 //! assert_eq!(r#""value""#, b.get(json));
 //! assert_eq!("[1, 2, 3]", c.get(json));
 //! # Ok::<(), liver_shot::Error>(())
+//! ```
+//!
+//! ### Read a value as a Rust type
+//!
+//! ```
+//! let json = r#"{"type": null, "error": true, "expired": 1585484}"#;
+//!
+//! let kind = liver_shot::find("type", json)?.value(json);
+//! assert!(kind.is_null());
+//!
+//! let error = liver_shot::find("error", json)?.value(json);
+//! assert_eq!(Some(true), error.as_bool());
+//!
+//! let expired = liver_shot::find("expired", json)?.value(json);
+//! assert_eq!(1585484, expired.as_number().unwrap().parse::<u32>()?);
+//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 
 #![no_std]
